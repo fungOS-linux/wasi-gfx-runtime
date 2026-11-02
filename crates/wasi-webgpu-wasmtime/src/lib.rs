@@ -18,8 +18,10 @@ mod enum_conversions;
 mod flags_conversions;
 mod to_core_conversions;
 
+mod readback;
 mod trait_impls;
 mod types;
+pub use readback::{read_texture_rgba, TextureImage};
 pub use types::*;
 
 /// Re-export of `wgpu_core` and `wgpu_types` so that runtime implementors don't need to keep track of what version of wgpu this crate is using.

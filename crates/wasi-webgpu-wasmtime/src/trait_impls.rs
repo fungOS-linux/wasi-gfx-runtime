@@ -327,15 +327,25 @@ impl<'a> webgpu::HostGpuDevice for WasiWebGpuCtx<'a> {
         let device_id = device.device;
         let error_handler = Arc::clone(&device.error_handler);
 
+        let core_descriptor = descriptor.to_core(self.table);
         let (texture_id, err) =
             self.instance
-                .device_create_texture(device_id, &descriptor.to_core(self.table), None);
+                .device_create_texture(device_id, &core_descriptor, None);
 
         error_handler.handle_possible_error(err);
 
+        let info = crate::TextureInfo {
+            width: core_descriptor.size.width,
+            height: core_descriptor.size.height,
+            format: core_descriptor.format,
+            usage: core_descriptor.usage,
+        };
         Ok(self.table.push(Texture {
             texture_id,
+            device_id,
+            queue_id: *device.queue,
             error_handler,
+            info: Some(info),
         })?)
     }
 

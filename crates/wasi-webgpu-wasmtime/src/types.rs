@@ -92,7 +92,10 @@ impl Device {
     pub unsafe fn connect_texture(&self, texture_id: wgpu_core::id::TextureId) -> Texture {
         Texture {
             texture_id,
+            device_id: self.device,
+            queue_id: *self.queue,
             error_handler: Arc::clone(&self.error_handler),
+            info: None,
         }
     }
 }
@@ -103,9 +106,28 @@ pub struct CommandEncoder {
     pub(crate) error_handler: Arc<ErrorHandler>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct TextureInfo {
+    pub width: u32,
+    pub height: u32,
+    pub format: wgpu_types::TextureFormat,
+    pub usage: wgpu_types::TextureUsages,
+}
+
 pub struct Texture {
     pub(crate) texture_id: wgpu_core::id::TextureId,
+    pub(crate) device_id: wgpu_core::id::DeviceId,
+    pub(crate) queue_id: wgpu_core::id::QueueId,
     pub(crate) error_handler: Arc<ErrorHandler>,
+    pub(crate) info: Option<TextureInfo>,
+}
+
+impl Texture {
+    /// The guest-visible descriptor of a texture created through `create-texture`.
+    /// Surface textures created by a native surface do not carry this yet.
+    pub fn info(&self) -> Option<TextureInfo> {
+        self.info
+    }
 }
 pub struct RenderPipeline {
     pub(crate) render_pipeline_id: wgpu_core::id::RenderPipelineId,
